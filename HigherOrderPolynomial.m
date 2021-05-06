@@ -1,0 +1,30 @@
+function [q,qd,qdd]=HigherOrderPolynomial(waypoints,waypointsVel,waypointsAccel,waypointTimes,ts)
+theta0=0
+qn=size(waypoints,1)
+q=waypoints(:,1);
+qd=zeros(qn,1);
+qdd=zeros(qn,1);
+for i =1:size(waypoints,2)-1
+    t0=waypointTimes(i);
+    tf=waypointTimes(i+1);
+    t=(t0:ts:tf)-t0;
+    q0=waypoints(:,i);
+    qf=waypoints(:,i+1);
+    v0=waypointsVel(:,i);
+    vf=waypointsVel(:,i+1);
+    a0=waypointsAccel(:,i);
+    af=waypointsAccel(:,i+1);
+    aa0=q0;
+    a1=v0;
+    a2=a0/2;
+    a3=(20*qf-20*q0-(8*vf+12*v0)*(tf-t0)-3*(a0-af)*(tf-t0).^2)/(2*(tf-t0).^3);
+    a4=(30*q0-30*qf+(14*vf+16*v0)*(tf-t0)+(3*a0-2*af)*(tf-t0).^2)/(2*(tf-t0).^4);
+    a5=(12*qf-12*q0-(6*vf+6*v0)*(tf-t0)-(a0-af)*(tf-t0).^2)/(2*(tf-t0).^5);
+    x=aa0+a1*t+a2*t.^2+a3*t.^3+a4*t.^4+a5*t.^5;
+    v=a1+2*a2*t+3*a3*t.^2+4*a4*t.^3+5*a5*t.^4;
+    a=2*a2+6*a3*t+12*a4*t.^2+20*a5*t.^3;
+    q=[q,x(:,2:end)];
+    qd=[qd,v(:,2:end)];
+    qdd=[qdd,a(:,2:end)];
+    end
+end
